@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Complete your purchase at Apple Resale Pro">
+    <title>Checkout - Apple Resale Pro</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container navbar">
+            <a href="index.html" class="logo" aria-label="Apple Resale Pro Home">Apple Resale Pro</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="section" style="padding-top: 120px;">
+            <div class="container">
+                <h1 class="section-title">Checkout</h1>
+
+                <nav class="checkout-progress" aria-label="Checkout progress">
+                    <div class="progress-step active" data-step="1" aria-label="Step 1: Shipping">Shipping</div>
+                    <div class="progress-step" data-step="2" aria-label="Step 2: Payment">Payment</div>
+                    <div class="progress-step" data-step="3" aria-label="Step 3: Review">Review</div>
+                </nav>
+
+                <div class="checkout-layout">
+                    <div class="checkout-form-container">
+                        <form id="checkout-form" novalidate>
+                            <div class="checkout-step active" data-step="1">
+                                <h2>Shipping Address</h2>
+                                <div class="form-group">
+                                    <label for="name">Full Name *</label>
+                                    <input type="text" id="name" name="name" required aria-required="true">
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email Address *</label>
+                                    <input type="email" id="email" name="email" required aria-required="true">
+                                </div>
+                                <div class="form-group">
+                                    <label for="address">Street Address *</label>
+                                    <input type="text" id="address" name="address" required aria-required="true">
+                                </div>
+                                <div class="form-group">
+                                    <label for="city">City *</label>
+                                    <input type="text" id="city" name="city" required aria-required="true">
+                                </div>
+                                <button type="button" class="btn" id="btn-to-payment"><span>Continue to Payment</span></button>
+                            </div>
+
+                            <div class="checkout-step" data-step="2">
+                                <h2>Payment Details</h2>
+                                <div class="form-group">
+                                    <label for="card-number">Card Number</label>
+                                    <input type="text" id="card-number" name="card-number" placeholder="XXXX XXXX XXXX XXXX" maxlength="19">
+                                </div>
+                                <div class="form-group">
+                                    <label for="card-name">Name on Card</label>
+                                    <input type="text" id="card-name" name="card-name">
+                                </div>
+                                <div style="display: flex; gap: 1rem;">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label for="card-expiry">Expiry (MM/YY)</label>
+                                        <input type="text" id="card-expiry" name="card-expiry" placeholder="MM/YY" maxlength="5">
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                        <label for="card-cvc">CVC</label>
+                                        <input type="text" id="card-cvc" name="card-cvc" placeholder="123" maxlength="4">
+                                    </div>
+                                </div>
+                                <div class="checkout-nav">
+                                    <button type="button" class="btn-secondary" id="btn-back-to-shipping">Back</button>
+                                    <button type="button" class="btn" id="btn-to-review"><span>Continue to Review</span></button>
+                                </div>
+                            </div>
+
+                            <div class="checkout-step" data-step="3">
+                                <h2>Review Your Order</h2>
+                                <div id="review-details"></div>
+                                <div class="checkout-nav">
+                                    <button type="button" class="btn-secondary" id="btn-back-to-payment">Back</button>
+                                    <button type="submit" class="btn"><span>Place Order</span></button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <aside class="order-summary-sidebar" aria-label="Order Summary">
+                        <h3>Order Summary</h3>
+                        <div id="summary-items">
+                            <!-- Summary items will be dynamically loaded here -->
+                        </div>
+                        <div class="summary-total">
+                            <span>Total</span>
+                            <span id="summary-total" aria-label="Order total">$0.00</span>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <script src="js/script.js"></script>
+</body>
+</html>

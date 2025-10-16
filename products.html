@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Browse our collection of premium Apple devices - iPhones, MacBooks, and iPads">
+    <title>All Products - Apple Resale Pro</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="container navbar">
+            <a href="index.html" class="logo" aria-label="Apple Resale Pro Home">Apple Resale Pro</a>
+            <nav class="main-nav" aria-label="Main Navigation">
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link">Home</a></li>
+                    <li><a href="products.html" class="nav-link" aria-current="page">Products</a></li>
+                    <li><a href="pre-order.html" class="nav-link">Pre-Order</a></li>
+                    <li>
+                        <a href="cart.html" class="nav-link cart-icon" aria-label="Shopping Cart">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+                            </svg>
+                            Cart 
+                            <span class="cart-badge" aria-label="Items in cart">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="search-container">
+                <input type="search" id="search-bar" placeholder="Search products..." aria-label="Search products">
+                <div id="search-results-dropdown" class="search-results-dropdown" role="listbox"></div>
+            </div>
+            <button class="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <section id="products-page-container" class="section" style="padding-top: 120px;">
+            <div class="container">
+                <h1 class="section-title">Our Collection</h1>
+                
+                <div class="products-page-layout">
+                    <aside id="filter-sidebar" class="filter-sidebar" aria-label="Product Filters">
+                        <h3>Filters</h3>
+                        
+                        <div class="filter-group active">
+                            <div class="filter-group-header">
+                                <h4>Category</h4>
+                            </div>
+                            <div class="filter-group-content">
+                                <label for="category-filter" class="sr-only">Select category</label>
+                                <select id="category-filter" aria-label="Filter by category">
+                                    <option value="all">All Products</option>
+                                    <option value="iphone">iPhones</option>
+                                    <option value="macbook">MacBooks</option>
+                                    <option value="ipad">iPads</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-group active">
+                            <div class="filter-group-header">
+                                <h4>Price Range</h4>
+                            </div>
+                            <div class="filter-group-content">
+                                <label for="price-filter" class="sr-only">Select price range</label>
+                                <select id="price-filter" aria-label="Filter by price">
+                                    <option value="all">All Prices</option>
+                                    <option value="0-999">$0 - $999</option>
+                                    <option value="1000-1999">$1,000 - $1,999</option>
+                                    <option value="2000-9999">$2,000+</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-group active">
+                            <div class="filter-group-header">
+                                <h4>Rating</h4>
+                            </div>
+                            <div class="filter-group-content">
+                                <div class="rating-filter">
+                                    <input type="radio" id="rating-all" name="rating-filter" value="" checked>
+                                    <label for="rating-all">All Ratings</label>
+                                </div>
+                                <div class="rating-filter">
+                                    <input type="radio" id="rating-4" name="rating-filter" value="4">
+                                    <label for="rating-4">★★★★☆ & up</label>
+                                </div>
+                                <div class="rating-filter">
+                                    <input type="radio" id="rating-3" name="rating-filter" value="3">
+                                    <label for="rating-3">★★★☆☆ & up</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button id="apply-filters-btn" class="btn"><span>Apply Filters</span></button>
+                    </aside>
+    
+                    <div class="product-content-area">
+                        <div id="product-grid" class="product-grid" role="list">
+                            <!-- Products will be dynamically loaded here -->
+                        </div>
+                        <nav id="pagination-container" aria-label="Product pagination"></nav>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Quick View Modal -->
+    <div id="quick-view-modal" class="quick-view-modal" role="dialog" aria-modal="true" aria-labelledby="quick-view-title">
+        <div id="quick-view-content" class="quick-view-modal-content">
+            <!-- Quick view content will be dynamically loaded here -->
+        </div>
+        <button class="close-modal-btn" aria-label="Close quick view"><span>&times;</span></button>
+    </div>
+
+    <div class="mobile-menu-overlay" aria-hidden="true"></div>
+    
+    <footer class="footer">
+        <div class="container">
+            <nav class="footer-links" aria-label="Footer Navigation">
+                <a href="#about">About Us</a>
+                <a href="#contact">Contact</a>
+                <a href="#terms">Terms of Service</a>
+            </nav>
+            <p>&copy; 2025 Apple Resale Pro. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
