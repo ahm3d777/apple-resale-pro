@@ -2,6 +2,17 @@
 // APPLE RESALE PRO - COMPREHENSIVE JAVASCRIPT
 // ============================================
 
+/* ==================== HELPER FUNCTIONS ==================== */
+function escapeHtml(unsafe) {
+    if (typeof unsafe !== 'string') return unsafe;
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+}
+
 /* ==================== PRODUCT DATA ==================== */
 const products = [
     {
@@ -135,8 +146,27 @@ const products = [
 ];
 
 /* ==================== STATE MANAGEMENT ==================== */
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
-let savedItems = JSON.parse(localStorage.getItem('savedItems')) || [];
+let cart = [];
+let savedItems = [];
+
+try {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+        cart = JSON.parse(savedCart);
+    }
+} catch (e) {
+    console.warn('Failed to access localStorage for cart:', e);
+}
+
+try {
+    const savedSavedItems = localStorage.getItem('savedItems');
+    if (savedSavedItems) {
+        savedItems = JSON.parse(savedSavedItems);
+    }
+} catch (e) {
+    console.warn('Failed to access localStorage for savedItems:', e);
+}
+
 let currentFilters = {
     category: 'all',
     priceRange: 'all',
@@ -271,9 +301,9 @@ function performSearch(query, resultsContainer) {
 
     resultsContainer.innerHTML = results.map(product => `
         <div class="search-result-item" onclick="navigateToProduct(${product.id})">
-            <img src="${product.image}" alt="${product.name}" loading="lazy">
+            <img src="${product.image}" alt="${escapeHtml(product.name)}" loading="lazy">
             <div>
-                <div style="font-weight: 600;">${product.name}</div>
+                <div style="font-weight: 600;">${escapeHtml(product.name)}</div>
                 <div style="color: var(--gold); font-weight: 700;">$${product.price}</div>
             </div>
         </div>
@@ -358,7 +388,7 @@ function addToCart(productId, quantity = 1) {
     updateCartBadge();
     renderMiniCart();
     openMiniCart();
-    showToast(`${product.name} added to cart!`, 'success');
+    showToast(`${escapeHtml(product.name)} added to cart!`, 'success');
 }
 
 function removeFromCart(productId) {
@@ -393,7 +423,29 @@ function updateCartQuantity(productId, quantity) {
 }
 
 function saveCart() {
-    localStorage.setItem('cart', JSON.stringify(cart));
+    try {
+        localStorage.setItem('cart', JSON.stringify(cart));
+    } catch (e) {
+        console.warn('Failed to save cart to localStorage:', e);
+        showToast('Could not save cart (Storage full or disabled)', 'error');
+    }
+}
+
+function clearCart() {
+    if (cart.length === 0) return;
+
+    if (confirm('Are you sure you want to clear your cart?')) {
+        cart = [];
+        saveCart();
+        updateCartBadge();
+        renderMiniCart();
+
+        if (getCurrentPage() === 'cart.html') {
+            renderCartPage();
+        }
+
+        showToast('Cart cleared', 'success');
+    }
 }
 
 function updateCartBadge() {
@@ -427,9 +479,9 @@ function renderMiniCart() {
 
     miniCartItems.innerHTML = cart.map(item => `
         <div class="cart-item">
-            <img src="${item.image}" alt="${item.name}" class="cart-item-image" loading="lazy">
+            <img src="${item.image}" alt="${escapeHtml(item.name)}" class="cart-item-image" loading="lazy">
             <div class="cart-item-details">
-                <div class="cart-item-name">${item.name}</div>
+                <div class="cart-item-name">${escapeHtml(item.name)}</div>
                 <div class="cart-item-price">$${item.price}</div>
                 <div class="cart-item-quantity">
                     <button class="quantity-btn" onclick="updateCartQuantity(${item.id}, ${item.quantity - 1})" aria-label="Decrease quantity">-</button>
@@ -541,15 +593,15 @@ function renderProducts(productsToRender, container) {
     container.innerHTML = productsToRender.map(product => `
         <article class="product-card scroll-reveal" role="listitem">
             <div class="product-image">
-                <img src="${product.image}" alt="${product.name}" loading="lazy">
-                ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
-                <button class="quick-view-btn" onclick="openQuickView(${product.id})" aria-label="Quick view ${product.name}">
+                <img src="${product.image}" alt="${escapeHtml(product.name)}" loading="lazy">
+                ${product.badge ? `<span class="product-badge">${escapeHtml(product.badge)}</span>` : ''}
+                <button class="quick-view-btn" onclick="openQuickView(${product.id})" aria-label="Quick view ${escapeHtml(product.name)}">
                     Quick View
                 </button>
             </div>
             <div class="product-info">
-                <div class="product-category">${product.category}</div>
-                <h3 class="product-name">${product.name}</h3>
+                <div class="product-category">${escapeHtml(product.category)}</div>
+                <h3 class="product-name">${escapeHtml(product.name)}</h3>
                 <div class="product-rating">
                     <span class="stars">${generateStars(product.rating)}</span>
                     <span class="rating-count">(${product.reviews})</span>
@@ -601,22 +653,22 @@ function openQuickView(productId) {
     modalContent.innerHTML = `
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
             <div>
-                <img src="${product.image}" alt="${product.name}" style="width: 100%; border-radius: var(--border-radius-lg);" loading="lazy">
+                <img src="${product.image}" alt="${escapeHtml(product.name)}" style="width: 100%; border-radius: var(--border-radius-lg);" loading="lazy">
             </div>
             <div>
-                <div style="font-size: var(--font-size-sm); color: var(--mid-gray); text-transform: uppercase; margin-bottom: 0.5rem;">${product.category}</div>
-                <h2 id="quick-view-title" style="font-size: var(--font-size-3xl); margin-bottom: 1rem;">${product.name}</h2>
+                <div style="font-size: var(--font-size-sm); color: var(--mid-gray); text-transform: uppercase; margin-bottom: 0.5rem;">${escapeHtml(product.category)}</div>
+                <h2 id="quick-view-title" style="font-size: var(--font-size-3xl); margin-bottom: 1rem;">${escapeHtml(product.name)}</h2>
                 <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
                     <span class="stars" style="color: var(--gold);">${generateStars(product.rating)}</span>
                     <span style="color: var(--mid-gray);">${product.rating} (${product.reviews} reviews)</span>
                 </div>
                 <div style="font-size: var(--font-size-3xl); color: var(--gold); font-weight: 700; margin-bottom: 1rem;">$${product.price}</div>
                 ${product.originalPrice ? `<div style="color: var(--mid-gray); text-decoration: line-through; margin-bottom: 1rem;">$${product.originalPrice}</div>` : ''}
-                <p style="color: var(--mid-gray); margin-bottom: 2rem;">${product.description}</p>
+                <p style="color: var(--mid-gray); margin-bottom: 2rem;">${escapeHtml(product.description)}</p>
                 <div style="margin-bottom: 2rem;">
                     <h4 style="margin-bottom: 1rem;">Key Features:</h4>
                     <ul style="list-style: disc; padding-left: 1.5rem; color: var(--mid-gray);">
-                        ${product.features.map(feature => `<li>${feature}</li>`).join('')}
+                        ${product.features.map(feature => `<li>${escapeHtml(feature)}</li>`).join('')}
                     </ul>
                 </div>
                 <div style="display: flex; gap: 1rem;">
@@ -695,7 +747,7 @@ function renderProductDetail(product) {
 
     container.innerHTML = `
         <div class="product-gallery">
-            <img src="${product.image}" alt="${product.name}" class="main-image" loading="lazy">
+            <img src="${product.image}" alt="${escapeHtml(product.name)}" class="main-image" loading="lazy">
         </div>
         <div>
             <nav class="breadcrumb" aria-label="Breadcrumb">
@@ -703,11 +755,11 @@ function renderProductDetail(product) {
                 <span class="breadcrumb-separator">/</span>
                 <a href="products.html">Products</a>
                 <span class="breadcrumb-separator">/</span>
-                <span>${product.name}</span>
+                <span>${escapeHtml(product.name)}</span>
             </nav>
 
-            <div style="font-size: var(--font-size-sm); color: var(--mid-gray); text-transform: uppercase; margin-bottom: 0.5rem;">${product.category}</div>
-            <h1 style="font-size: var(--font-size-4xl); margin-bottom: 1rem;">${product.name}</h1>
+            <div style="font-size: var(--font-size-sm); color: var(--mid-gray); text-transform: uppercase; margin-bottom: 0.5rem;">${escapeHtml(product.category)}</div>
+            <h1 style="font-size: var(--font-size-4xl); margin-bottom: 1rem;">${escapeHtml(product.name)}</h1>
 
             <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
                 <span class="stars" style="color: var(--gold); font-size: var(--font-size-lg);">${generateStars(product.rating)}</span>
@@ -717,15 +769,15 @@ function renderProductDetail(product) {
             <div style="font-size: var(--font-size-4xl); color: var(--gold); font-weight: 700; margin-bottom: 1rem;">$${product.price}</div>
             ${product.originalPrice ? `<div style="color: var(--mid-gray); text-decoration: line-through; font-size: var(--font-size-xl); margin-bottom: 2rem;">$${product.originalPrice}</div>` : ''}
 
-            <p style="color: var(--mid-gray); font-size: var(--font-size-lg); margin-bottom: 2rem; line-height: 1.8;">${product.description}</p>
+            <p style="color: var(--mid-gray); font-size: var(--font-size-lg); margin-bottom: 2rem; line-height: 1.8;">${escapeHtml(product.description)}</p>
 
             <div style="background: var(--light-gray); padding: 1.5rem; border-radius: var(--border-radius-md); margin-bottom: 2rem;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div>
-                        <strong>Condition:</strong> ${product.condition}
+                        <strong>Condition:</strong> ${escapeHtml(product.condition)}
                     </div>
                     <div>
-                        <strong>Warranty:</strong> ${product.warranty}
+                        <strong>Warranty:</strong> ${escapeHtml(product.warranty)}
                     </div>
                     <div>
                         <strong>Stock:</strong> ${product.inStock ? '<span style="color: var(--green);">In Stock</span>' : '<span style="color: var(--red);">Out of Stock</span>'}
@@ -738,10 +790,27 @@ function renderProductDetail(product) {
                 <ul style="list-style: none; padding: 0;">
                     ${product.features.map(feature => `
                         <li style="padding: 0.75rem; background: var(--light-gray); border-radius: var(--border-radius-sm); margin-bottom: 0.5rem;">
-                            ✓ ${feature}
+                            ✓ ${escapeHtml(feature)}
                         </li>
                     `).join('')}
                 </ul>
+            </div>
+
+            <div class="related-products">
+                <h3 style="margin-bottom: 1rem;">Related Products</h3>
+                <div class="product-grid" style="margin-top: 1rem;">
+                    ${getRelatedProducts(product).map(p => `
+                        <article class="product-card" onclick="navigateToProduct(${p.id})">
+                           <div class="product-image" style="height: 200px;">
+                                <img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy">
+                           </div>
+                           <div class="product-info" style="padding: 1rem;">
+                                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">${escapeHtml(p.name)}</h4>
+                                <div style="color: var(--gold); font-weight: 700;">$${p.price}</div>
+                           </div>
+                        </article>
+                    `).join('')}
+                </div>
             </div>
 
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
@@ -754,6 +823,12 @@ function renderProductDetail(product) {
             </div>
         </div>
     `;
+}
+
+function getRelatedProducts(currentProduct) {
+    return products
+        .filter(p => p.category === currentProduct.category && p.id !== currentProduct.id)
+        .slice(0, 3);
 }
 
 /* ==================== CART PAGE ==================== */
@@ -779,18 +854,29 @@ function renderCartPage() {
         `;
         cartTotal.textContent = '0.00';
         if (checkoutBtn) checkoutBtn.style.display = 'none';
+
+        // Add clear cart button container if it doesn't exist (though it should be hidden if cart is empty)
+        const clearCartBtn = document.getElementById('clear-cart-btn');
+        if (clearCartBtn) clearCartBtn.style.display = 'none';
+
         return;
     }
 
     const total = getCartTotal();
 
+    // Add Clear Cart button if it doesn't exist
+    let clearCartBtn = document.getElementById('clear-cart-btn');
+    if (!clearCartBtn && cart.length > 0) {
+        // We'll append it after the list
+    }
+
     cartItems.innerHTML = cart.map(item => `
         <div class="cart-item" style="margin-bottom: 1rem; background: var(--light-gray); padding: 1.5rem; border-radius: var(--border-radius-md);">
             <div style="display: grid; grid-template-columns: 100px 1fr auto; gap: 1.5rem; align-items: center;">
-                <img src="${item.image}" alt="${item.name}" style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--border-radius-sm);" loading="lazy">
+                <img src="${item.image}" alt="${escapeHtml(item.name)}" style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--border-radius-sm);" loading="lazy">
                 <div>
-                    <h3 style="margin-bottom: 0.5rem;">${item.name}</h3>
-                    <p style="color: var(--mid-gray); margin-bottom: 0.5rem;">${item.description}</p>
+                    <h3 style="margin-bottom: 0.5rem;">${escapeHtml(item.name)}</h3>
+                    <p style="color: var(--mid-gray); margin-bottom: 0.5rem;">${escapeHtml(item.description)}</p>
                     <div style="font-size: var(--font-size-xl); color: var(--gold); font-weight: 700;">$${item.price}</div>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 1rem; align-items: flex-end;">
@@ -800,11 +886,18 @@ function renderCartPage() {
                         <button class="quantity-btn" onclick="updateCartQuantity(${item.id}, ${item.quantity + 1})" aria-label="Increase quantity">+</button>
                     </div>
                     <div style="font-size: var(--font-size-lg); font-weight: 700;">$${(item.price * item.quantity).toFixed(2)}</div>
-                    <button onclick="removeFromCart(${item.id})" style="color: var(--red); font-size: var(--font-size-sm); text-decoration: underline;" aria-label="Remove ${item.name} from cart">Remove</button>
+                    <button onclick="removeFromCart(${item.id})" style="color: var(--red); font-size: var(--font-size-sm); text-decoration: underline;" aria-label="Remove ${escapeHtml(item.name)} from cart">Remove</button>
                 </div>
             </div>
         </div>
     `).join('');
+
+    // Add clear cart button
+    cartItems.innerHTML += `
+        <div style="text-align: right; margin-top: 1rem;">
+            <button id="clear-cart-btn" onclick="clearCart()" class="btn-secondary" style="color: var(--red); border-color: var(--red);">Clear Cart</button>
+        </div>
+    `;
 
     cartTotal.textContent = total.toFixed(2);
     if (checkoutBtn) checkoutBtn.style.display = 'inline-flex';
@@ -823,9 +916,13 @@ function saveForLater(productId) {
     }
 
     savedItems.push(product);
-    localStorage.setItem('savedItems', JSON.stringify(savedItems));
+    try {
+        localStorage.setItem('savedItems', JSON.stringify(savedItems));
+    } catch (e) {
+        console.warn('Failed to save savedItems to localStorage:', e);
+    }
 
-    showToast(`${product.name} saved for later!`, 'success');
+    showToast(`${escapeHtml(product.name)} saved for later!`, 'success');
 
     if (getCurrentPage() === 'cart.html') {
         renderSavedItems();
@@ -843,8 +940,8 @@ function renderSavedItems() {
 
     savedItemsGrid.innerHTML = savedItems.map(item => `
         <div style="background: var(--white); padding: 1rem; border-radius: var(--border-radius-md); box-shadow: var(--shadow-sm);">
-            <img src="${item.image}" alt="${item.name}" style="width: 100%; height: 150px; object-fit: cover; border-radius: var(--border-radius-sm); margin-bottom: 0.5rem;" loading="lazy">
-            <h4 style="font-size: var(--font-size-base); margin-bottom: 0.5rem;">${item.name}</h4>
+            <img src="${item.image}" alt="${escapeHtml(item.name)}" style="width: 100%; height: 150px; object-fit: cover; border-radius: var(--border-radius-sm); margin-bottom: 0.5rem;" loading="lazy">
+            <h4 style="font-size: var(--font-size-base); margin-bottom: 0.5rem;">${escapeHtml(item.name)}</h4>
             <div style="color: var(--gold); font-weight: 700; margin-bottom: 0.5rem;">$${item.price}</div>
             <button class="btn" onclick="addToCart(${item.id}); removeSavedItem(${item.id});" style="width: 100%; padding: 0.5rem;">
                 <span>Move to Cart</span>
@@ -855,7 +952,11 @@ function renderSavedItems() {
 
 function removeSavedItem(productId) {
     savedItems = savedItems.filter(item => item.id !== productId);
-    localStorage.setItem('savedItems', JSON.stringify(savedItems));
+    try {
+        localStorage.setItem('savedItems', JSON.stringify(savedItems));
+    } catch (e) {
+        console.warn('Failed to save savedItems to localStorage:', e);
+    }
     renderSavedItems();
 }
 
@@ -964,7 +1065,7 @@ function renderOrderSummary() {
     summaryItems.innerHTML = cart.map(item => `
         <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--mid-gray);">
             <div>
-                <div style="font-weight: 600;">${item.name}</div>
+                <div style="font-weight: 600;">${escapeHtml(item.name)}</div>
                 <div style="color: var(--mid-gray); font-size: var(--font-size-sm);">Qty: ${item.quantity}</div>
             </div>
             <div style="font-weight: 700;">$${(item.price * item.quantity).toFixed(2)}</div>
@@ -986,17 +1087,17 @@ function renderReviewStep() {
     reviewDetails.innerHTML = `
         <div style="background: var(--light-gray); padding: 1.5rem; border-radius: var(--border-radius-md); margin-bottom: 2rem;">
             <h3 style="margin-bottom: 1rem;">Shipping Information</h3>
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Address:</strong> ${address}</p>
-            <p><strong>City:</strong> ${city}</p>
+            <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+            <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+            <p><strong>Address:</strong> ${escapeHtml(address)}</p>
+            <p><strong>City:</strong> ${escapeHtml(city)}</p>
         </div>
 
         <div style="background: var(--light-gray); padding: 1.5rem; border-radius: var(--border-radius-md);">
             <h3 style="margin-bottom: 1rem;">Order Items</h3>
             ${cart.map(item => `
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <span>${item.name} x ${item.quantity}</span>
+                    <span>${escapeHtml(item.name)} x ${item.quantity}</span>
                     <span>$${(item.price * item.quantity).toFixed(2)}</span>
                 </div>
             `).join('')}
@@ -1020,7 +1121,11 @@ function handleCheckoutSubmit(e) {
     updateCartBadge();
 
     // Store order number and redirect
-    localStorage.setItem('lastOrderNumber', orderNumber);
+    try {
+        localStorage.setItem('lastOrderNumber', orderNumber);
+    } catch (e) {
+        console.warn('Failed to save order number:', e);
+    }
     window.location.href = 'confirmation.html';
 }
 
@@ -1127,6 +1232,8 @@ function showToast(message, type = 'info') {
     if (!toastContainer) {
         toastContainer = document.createElement('div');
         toastContainer.className = 'toast-container';
+        toastContainer.setAttribute('role', 'alert');
+        toastContainer.setAttribute('aria-live', 'assertive');
         document.body.appendChild(toastContainer);
     }
 
@@ -1248,7 +1355,13 @@ function initializeDarkMode() {
     }
 
     // Load saved theme
-    const savedTheme = localStorage.getItem('theme') || 'light';
+    let savedTheme = 'light';
+    try {
+        savedTheme = localStorage.getItem('theme') || 'light';
+    } catch (e) {
+        console.warn('Failed to access localStorage for theme:', e);
+    }
+
     document.documentElement.setAttribute('data-theme', savedTheme);
 
     themeToggle.addEventListener('click', () => {
@@ -1256,7 +1369,11 @@ function initializeDarkMode() {
         const newTheme = currentTheme === 'light' ? 'dark' : 'light';
 
         document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
+        try {
+            localStorage.setItem('theme', newTheme);
+        } catch (e) {
+            console.warn('Failed to save theme to localStorage:', e);
+        }
 
         showToast(`${newTheme === 'dark' ? 'Dark' : 'Light'} mode enabled`, 'info');
     });
@@ -1344,7 +1461,13 @@ document.addEventListener('keydown', (e) => {
 
 /* ==================== ORDER CONFIRMATION ==================== */
 if (getCurrentPage() === 'confirmation.html') {
-    const orderNumber = localStorage.getItem('lastOrderNumber');
+    let orderNumber = null;
+    try {
+        orderNumber = localStorage.getItem('lastOrderNumber');
+    } catch (e) {
+        console.warn('Failed to access localStorage for order number:', e);
+    }
+
     const orderNumberEl = document.getElementById('order-number');
 
     if (orderNumberEl && orderNumber) {
@@ -1362,3 +1485,4 @@ window.navigateToProduct = navigateToProduct;
 window.saveForLater = saveForLater;
 window.removeSavedItem = removeSavedItem;
 window.toggleAccordion = toggleAccordion;
+window.clearCart = clearCart;

@@ -1298,6 +1298,11 @@ input, textarea, select {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
+    pointer-events: none; /* Allow clicking through container */
+}
+
+.toast-container > * {
+    pointer-events: auto; /* Enable pointer events for toast items */
 }
 
 .toast {
